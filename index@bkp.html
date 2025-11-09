@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice AI - Simple TTS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 28px;
+        }
+        
+        .badge {
+            text-align: center;
+            color: #27ae60;
+            margin-bottom: 30px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+            font-size: 14px;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        #status {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            color: #333;
+            min-height: 20px;
+            border-left: 4px solid #667eea;
+        }
+        
+        #player {
+            width: 100%;
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .success {
+            color: #27ae60;
+            background: #d5f4e6 !important;
+            border-left-color: #27ae60 !important;
+        }
+        
+        .error {
+            color: #e74c3c;
+            background: #fadbd8 !important;
+            border-left-color: #e74c3c !important;
+        }
+        
+        .loading {
+            color: #667eea;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎤 Voice AI System</h1>
+        <div class="badge">✅ Text-to-Speech | 💰 Cost: $0.00 | 🔑 Free & Open</div>
+        
+        <div class="form-group">
+            <label for="text">📝 Enter Your Text:</label>
+            <textarea id="text" placeholder="Type your text here...">Hello! This is a voice synthesis test.</textarea>
+        </div>
+        
+        <button onclick="generateSpeech()">🎵 Generate Speech</button>
+        
+        <div id="status"></div>
+        <audio id="player" controls></audio>
+    </div>
+    
+    <script>
+        async function generateSpeech() {
+            const text = document.getElementById('text').value.trim();
+            const status = document.getElementById('status');
+            const player = document.getElementById('player');
+            
+            if (!text) {
+                status.className = 'error';
+                status.textContent = '❌ Please enter some text!';
+                return;
+            }
+            
+            if (text.length > 500) {
+                status.className = 'error';
+                status.textContent = '❌ Text too long! Maximum 500 characters.';
+                return;
+            }
+            
+            status.className = 'loading';
+            status.textContent = '⏳ Generating audio... Please wait...';
+            player.style.display = 'none';
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/v1/synthesize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: text,
+                        voice_id: 'pyttsx3'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    player.src = 'http://localhost:5000' + data.audio_url;
+                    player.style.display = 'block';
+                    
+                    status.className = 'success';
+                    status.innerHTML = `✅ Success! Generated by ${data.provider}. Cost: ${data.cost}`;
+                } else {
+                    status.className = 'error';
+                    status.textContent = `❌ Error: ${data.error}`;
+                }
+            } catch (error) {
+                status.className = 'error';
+                status.textContent = `❌ Connection Error: ${error.message}`;
+            }
+        }
+
+        // Fetch and display analytics every 2 seconds
+        function updateAnalytics() {
+            fetch('http://localhost:5000/api/v1/analytics')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('analytics-section').style.display = 'block';
+                        document.getElementById('total-requests').textContent = data.total_requests;
+                        document.getElementById('avg-text-length').textContent = data.avg_text_length;
+                        
+                        // Show last event time
+                        if (data.events.length > 0) {
+                            const lastEvent = data.events[data.events.length - 1];
+                            const eventDate = new Date(lastEvent.timestamp * 1000).toLocaleTimeString();
+                            document.getElementById('last-request-time').textContent = eventDate;
+                            
+                            // Display recent events
+                            const eventsList = document.getElementById('events-list');
+                            eventsList.innerHTML = data.events.map(event => 
+                                `<div style="padding: 8px; border-bottom: 1px solid #eee; font-size: 12px;">
+                                    <strong>${event.text.substring(0, 30)}...</strong> (${event.length} chars)
+                                </div>`
+                            ).join('');
+                        }
+                    }
+                })
+                .catch(err => console.log('Analytics error:', err));
+        }
+        
+        // Update analytics every 2 seconds
+        setInterval(updateAnalytics, 2000);
+        
+        // Initial call
+        updateAnalytics();
+
+
+    </script>
+        <!-- ========== ANALYTICS DASHBOARD ========== -->
+        <div id="analytics-section" style="margin-top: 40px; padding: 20px; background: #f5f5f5; border-radius: 10px; display: none;">
+            <h2 style="color: #333; margin-bottom: 15px;">📊 Live Analytics</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea;">
+                    <div style="font-size: 12px; color: #999; margin-bottom: 5px;">Total Requests</div>
+                    <div id="total-requests" style="font-size: 24px; font-weight: bold; color: #667eea;">0</div>
+                </div>
+                
+                <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #764ba2;">
+                    <div style="font-size: 12px; color: #999; margin-bottom: 5px;">Avg Text Length</div>
+                    <div id="avg-text-length" style="font-size: 24px; font-weight: bold; color: #764ba2;">0</div>
+                </div>
+                
+                <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #27ae60;">
+                    <div style="font-size: 12px; color: #999; margin-bottom: 5px;">Last Request Time</div>
+                    <div id="last-request-time" style="font-size: 12px; font-weight: bold; color: #27ae60;">--</div>
+                </div>
+            </div>
+            
+            <h3 style="color: #333; margin-top: 20px; margin-bottom: 10px;">📈 Recent Events</h3>
+            <div id="events-list" style="background: white; padding: 15px; border-radius: 8px; max-height: 200px; overflow-y: auto;">
+                <p style="color: #999;">No events yet...</p>
+            </div>
+        </div>
+        <!-- ========== END ANALYTICS ========== -->
+    
+</body>
+</html>
