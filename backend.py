@@ -1,16 +1,24 @@
 from flask import Flask, request, jsonify, send_file, render_template_string
 from flask_cors import CORS
-import subprocess
 import os
 import uuid
 import json
 import time
+from google.cloud import texttospeech
 
 app = Flask(__name__)
 CORS(app)
 
 os.makedirs('audio_output', exist_ok=True)
 os.makedirs('events', exist_ok=True)
+
+# Initialize Google TTS client
+try:
+    client = texttospeech.TextToSpeechClient()
+    GOOGLE_TTS_AVAILABLE = True
+except:
+    GOOGLE_TTS_AVAILABLE = False
+    print("⚠️ Google TTS not available - using fallback")
 
 @app.route('/')
 def serve_frontend():
@@ -21,7 +29,6 @@ def serve_frontend():
         return html_content
     except FileNotFoundError:
         return "index.html not found", 404
-
 
 @app.route('/api/v1/synthesize', methods=['POST'])
 def synthesize():
@@ -34,21 +41,34 @@ def synthesize():
             return jsonify({'success': False, 'error': 'Text required'}), 400
         
         filename = f"tts_{uuid.uuid4().hex[:8]}"
-        aiff_path = os.path.abspath(os.path.join('audio_output', f"{filename}.aiff"))
         wav_path = os.path.abspath(os.path.join('audio_output', f"{filename}.wav"))
         
-        # Step 1: Generate AIFF
-        print(f"Generating AIFF: {aiff_path}")
-        subprocess.run(['say', text, '-o', aiff_path], check=True, capture_output=True)
+        if not GOOGLE_TTS_AVAILABLE:
+            return jsonify({'success': False, 'error': 'TTS service not available'}), 500
         
-        # Step 2: Convert AIFF to WAV
-        print(f"Converting to WAV: {wav_path}")
-        subprocess.run(['ffmpeg', '-i', aiff_path, '-q:a', '9', '-n', wav_path], 
-                      capture_output=True, check=True)
+        # Google Text-to-Speech synthesis
+        print(f"Synthesizing with Google TTS: {text[:50]}...")
         
-        # Step 3: Clean up AIFF
-        if os.path.exists(aiff_path):
-            os.remove(aiff_path)
+        synthesis_input = texttospeech.SynthesisInput(text=text)
+        
+        voice = texttospeech.VoiceSelectionParams(
+            language_code="en-US",
+            ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL
+        )
+        
+        audio_config = texttospeech.AudioConfig(
+            audio_encoding=texttospeech.AudioEncoding.LINEAR16
+        )
+        
+        response = client.synthesize_speech(
+            input=synthesis_input,
+            voice=voice,
+            audio_config=audio_config
+        )
+        
+        # Write audio to file
+        with open(wav_path, 'wb') as out:
+            out.write(response.audio_content)
         
         if os.path.exists(wav_path) and os.path.getsize(wav_path) > 100:
             print(f"✅ File created: {wav_path}")
@@ -64,24 +84,16 @@ def synthesize():
             # LOG EVENT
             processing_time = round(time.time() - start_time, 3)
             event_data = {
-                 "timestamp": time.time(),
+                "timestamp": time.time(),
                 "datetime": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
                 "request_id": uuid.uuid4().hex,
-                "service": "voice-ai-backend",
-                "version": "1.0.0",
-                "method": request.method,
-                "endpoint": request.path,
-                "client_ip": request.remote_addr,
-                "user_agent": request.headers.get("User-Agent"),
                 "text": text,
                 "length": len(text),
                 "filename": filename,
-                "output_format": "wav",
-                "file_size": file_size,   # <-- use human-readable size
-                "voice_provider": "macOS Voice",
-                "conversion_tool": "ffmpeg",
+                "file_size": file_size,
+                "voice_provider": "Google Cloud TTS",
                 "processing_time": processing_time,
-                "success": True,
+                "success": True
             }
             
             # Write to events folder
@@ -95,11 +107,11 @@ def synthesize():
             return jsonify({
                 'success': True,
                 'audio_url': f'/download/{filename}.wav',
-                'provider': 'macOS Voice',
+                'provider': 'Google Cloud TTS',
                 'cost': '$0.00'
             })
         else:
-            return jsonify({'success': False, 'error': 'Audio conversion failed'}), 500
+            return jsonify({'success': False, 'error': 'Audio synthesis failed'}), 500
     
     except Exception as e:
         print(f"Synthesis error: {e}")
@@ -120,7 +132,7 @@ def get_voices():
     return jsonify({
         'success': True,
         'voices': [
-            {'id': 'macos', 'name': 'macOS Voice', 'provider': 'macOS', 'cost': '$0.00'}
+            {'id': 'google', 'name': 'Google Cloud TTS', 'provider': 'Google', 'cost': '$0.00'}
         ]
     })
 
