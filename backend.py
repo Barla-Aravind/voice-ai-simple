@@ -1,10 +1,9 @@
-from flask import Flask, request, jsonify, send_file, render_template_string
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import os
 import uuid
 import json
 import time
-from google.cloud import texttospeech
 
 app = Flask(__name__)
 CORS(app)
@@ -12,22 +11,21 @@ CORS(app)
 os.makedirs('audio_output', exist_ok=True)
 os.makedirs('events', exist_ok=True)
 
-# Initialize Google TTS client
+# Try gTTS (works on Mac, Linux, Railway - NO dependencies)
 try:
-    client = texttospeech.TextToSpeechClient()
-    GOOGLE_TTS_AVAILABLE = True
-except:
-    GOOGLE_TTS_AVAILABLE = False
-    print("⚠️ Google TTS not available - using fallback")
+    from gtts import gTTS
+    GTTS_AVAILABLE = True
+    print("✅ gTTS available")
+except ImportError:
+    GTTS_AVAILABLE = False
+    print("⚠️ gTTS not available - install: pip install gtts")
 
 @app.route('/')
 def serve_frontend():
-    """Serve the index.html file"""
     try:
         with open('index.html', 'r') as f:
-            html_content = f.read()
-        return html_content
-    except FileNotFoundError:
+            return f.read()
+    except:
         return "index.html not found", 404
 
 @app.route('/api/v1/synthesize', methods=['POST'])
@@ -42,38 +40,34 @@ def synthesize():
         
         filename = f"tts_{uuid.uuid4().hex[:8]}"
         wav_path = os.path.abspath(os.path.join('audio_output', f"{filename}.wav"))
+        mp3_path = os.path.abspath(os.path.join('audio_output', f"{filename}.mp3"))
         
-        if not GOOGLE_TTS_AVAILABLE:
-            return jsonify({'success': False, 'error': 'TTS service not available'}), 500
+        print(f"📝 Synthesizing: {text[:50]}...")
         
-        # Google Text-to-Speech synthesis
-        print(f"Synthesizing with Google TTS: {text[:50]}...")
+        if GTTS_AVAILABLE:
+            try:
+                # Use gTTS for HIGH QUALITY audio
+                tts = gTTS(text=text, lang='en', slow=False)
+                tts.save(mp3_path)
+                
+                # Convert MP3 to WAV if needed (for compatibility)
+                # For now, serve MP3 directly - browsers support it
+                wav_path = mp3_path.replace('.mp3', '.wav')
+                
+                # Actually, let's just use MP3 - it's smaller and better quality
+                file_to_serve = mp3_path
+                serve_ext = '.mp3'
+                
+                print(f"✅ gTTS success")
+                
+            except Exception as e:
+                print(f"❌ gTTS error: {e}")
+                return jsonify({'success': False, 'error': str(e)}), 500
+        else:
+            return jsonify({'success': False, 'error': 'Install: pip install gtts'}), 500
         
-        synthesis_input = texttospeech.SynthesisInput(text=text)
-        
-        voice = texttospeech.VoiceSelectionParams(
-            language_code="en-US",
-            ssml_gender=texttospeech.SsmlVoiceGender.NEUTRAL
-        )
-        
-        audio_config = texttospeech.AudioConfig(
-            audio_encoding=texttospeech.AudioEncoding.LINEAR16
-        )
-        
-        response = client.synthesize_speech(
-            input=synthesis_input,
-            voice=voice,
-            audio_config=audio_config
-        )
-        
-        # Write audio to file
-        with open(wav_path, 'wb') as out:
-            out.write(response.audio_content)
-        
-        if os.path.exists(wav_path) and os.path.getsize(wav_path) > 100:
-            print(f"✅ File created: {wav_path}")
-            
-            size_bytes = os.path.getsize(wav_path)
+        if os.path.exists(file_to_serve) and os.path.getsize(file_to_serve) > 100:
+            size_bytes = os.path.getsize(file_to_serve)
             if size_bytes < 1024:
                 file_size = f"{size_bytes} B"
             elif size_bytes < 1024 * 1024:
@@ -81,7 +75,6 @@ def synthesize():
             else:
                 file_size = f"{round(size_bytes / (1024 * 1024), 2)} MB"
             
-            # LOG EVENT
             processing_time = round(time.time() - start_time, 3)
             event_data = {
                 "timestamp": time.time(),
@@ -91,98 +84,80 @@ def synthesize():
                 "length": len(text),
                 "filename": filename,
                 "file_size": file_size,
-                "voice_provider": "Google Cloud TTS",
+                "voice_provider": "Google TTS (gTTS)",
                 "processing_time": processing_time,
                 "success": True
             }
             
-            # Write to events folder
             event_filename = f"{uuid.uuid4().hex}.json"
             event_path = os.path.join("events", event_filename)
             with open(event_path, "w") as f:
                 json.dump(event_data, f)
             
-            print(f"✅ Event logged: {event_path}")
+            print(f"✅ Event logged")
             
             return jsonify({
                 'success': True,
-                'audio_url': f'/download/{filename}.wav',
-                'provider': 'Google Cloud TTS',
+                'audio_url': f'/download/{filename}{serve_ext}',
+                'provider': 'Google TTS (gTTS)',
                 'cost': '$0.00'
             })
         else:
             return jsonify({'success': False, 'error': 'Audio synthesis failed'}), 500
     
     except Exception as e:
-        print(f"Synthesis error: {e}")
+        print(f"❌ Error: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 @app.route('/download/<filename>')
 def download(filename):
     try:
+        # Support both .wav and .mp3
         file_path = os.path.join('audio_output', filename)
+        
         if os.path.exists(file_path):
-            return send_file(file_path, mimetype='audio/wav', as_attachment=False)
+            if filename.endswith('.mp3'):
+                return send_file(file_path, mimetype='audio/mpeg', as_attachment=False)
+            else:
+                return send_file(file_path, mimetype='audio/wav', as_attachment=False)
+        
         return jsonify({'error': 'File not found'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@app.route('/api/v1/voices', methods=['GET'])
-def get_voices():
-    return jsonify({
-        'success': True,
-        'voices': [
-            {'id': 'google', 'name': 'Google Cloud TTS', 'provider': 'Google', 'cost': '$0.00'}
-        ]
-    })
-
 @app.route('/api/v1/analytics', methods=['GET'])
 def get_analytics():
-    """Return current analytics from events folder"""
     try:
         events_dir = 'events'
         
         if not os.path.exists(events_dir) or not os.listdir(events_dir):
-            return jsonify({
-                'success': True,
-                'total_requests': 0,
-                'avg_text_length': 0,
-                'events': []
-            })
+            return jsonify({'success': True, 'total_requests': 0, 'avg_text_length': 0, 'events': []})
         
-        # Read all JSON files from events folder
         events = []
         for filename in os.listdir(events_dir):
             if filename.endswith('.json'):
-                filepath = os.path.join(events_dir, filename)
-                with open(filepath, 'r') as f:
-                    event = json.load(f)
-                    events.append(event)
+                try:
+                    with open(os.path.join(events_dir, filename), 'r') as f:
+                        events.append(json.load(f))
+                except:
+                    pass
         
         if not events:
-            return jsonify({
-                'success': True,
-                'total_requests': 0,
-                'avg_text_length': 0,
-                'events': []
-            })
+            return jsonify({'success': True, 'total_requests': 0, 'avg_text_length': 0, 'events': []})
         
-        # Sort by timestamp (newest first)
         events.sort(key=lambda x: x.get('timestamp', 0), reverse=True)
-        
-        # Calculate average text length
         avg_length = sum(e['length'] for e in events) / len(events)
         
         return jsonify({
             'success': True,
             'total_requests': len(events),
             'avg_text_length': round(avg_length, 2),
-            'events': events[:10]  # Last 10 events
+            'events': events[:10]
         })
     except Exception as e:
-        print(f"Analytics error: {e}")
+        print(f"❌ Analytics error: {e}")
         return jsonify({'success': False, 'error': str(e)}), 500
 
 if __name__ == '__main__':
-    print("🚀 Voice AI Backend Running on http://localhost:5000")
+    print("🚀 Voice AI Backend on http://localhost:5000")
     app.run(debug=True, host='0.0.0.0', port=5000)

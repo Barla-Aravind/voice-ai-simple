@@ -5,228 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Voice AI - Streaming Analytics</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-        
-        .main-section {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-            margin-bottom: 20px;
-        }
-        
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            text-align: center;
-            font-size: 28px;
-        }
-        
-        .badge {
-            text-align: center;
-            color: #27ae60;
-            margin-bottom: 30px;
-            font-size: 14px;
-            font-weight: bold;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-            font-size: 14px;
-        }
-        
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 14px;
-            font-family: inherit;
-            resize: vertical;
-            min-height: 100px;
-        }
-        
-        textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
-        }
-        
-        button {
-            width: 100%;
-            padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
-        }
-        
-        button:active {
-            transform: translateY(0);
-        }
-        
-        #status {
-            margin-top: 20px;
-            padding: 15px;
-            background: #f0f0f0;
-            border-radius: 8px;
-            color: #333;
-            min-height: 20px;
-            border-left: 4px solid #667eea;
-        }
-        
-        #player {
-            width: 100%;
-            margin-top: 20px;
-            display: none;
-        }
-        
-        .success {
-            color: #27ae60;
-            background: #d5f4e6 !important;
-            border-left-color: #27ae60 !important;
-        }
-        
-        .error {
-            color: #e74c3c;
-            background: #fadbd8 !important;
-            border-left-color: #e74c3c !important;
-        }
-        
-        .loading {
-            color: #667eea;
-            font-weight: bold;
-        }
-        
-        /* ========== ANALYTICS DASHBOARD ========== */
-        #analytics-dashboard {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
-        }
-        
-        .analytics-header {
-            color: #333;
-            margin-bottom: 25px;
-            font-size: 24px;
-            font-weight: bold;
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 10px;
-        }
-        
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        
-        .metric-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
-            border-radius: 10px;
-            color: white;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
-        }
-        
-        .metric-label {
-            font-size: 13px;
-            opacity: 0.9;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .metric-value {
-            font-size: 32px;
-            font-weight: bold;
-        }
-        
-        .events-section {
-            background: #f9f9f9;
-            padding: 20px;
-            border-radius: 10px;
-            border-left: 4px solid #667eea;
-        }
-        
-        .events-title {
-            color: #333;
-            margin-bottom: 15px;
-            font-size: 18px;
-            font-weight: bold;
-        }
-        
-        .events-list {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-        
-        .event-item {
-            background: white;
-            padding: 12px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            border-left: 3px solid #667eea;
-            font-size: 13px;
-        }
-        
-        .event-text {
-            color: #333;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        
-        .event-meta {
-            color: #999;
-            font-size: 12px;
-        }
-        
-        .no-events {
-            color: #999;
-            text-align: center;
-            padding: 30px;
-            font-style: italic;
-        }
-        
-        /* ========== END ANALYTICS ========== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; }
+        .main-section { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); margin-bottom: 20px; }
+        h1 { color: #333; margin-bottom: 10px; text-align: center; font-size: 28px; }
+        .badge { text-align: center; color: #27ae60; margin-bottom: 30px; font-size: 14px; font-weight: bold; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; color: #333; font-weight: 500; font-size: 14px; }
+        textarea { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; resize: vertical; min-height: 100px; }
+        textarea:focus { outline: none; border-color: #667eea; box-shadow: 0 0 5px rgba(102, 126, 234, 0.3); }
+        button { width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4); }
+        #status { margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px; color: #333; min-height: 20px; border-left: 4px solid #667eea; }
+        #player { width: 100%; margin-top: 20px; }
+        .success { color: #27ae60; background: #d5f4e6 !important; border-left-color: #27ae60 !important; }
+        .error { color: #e74c3c; background: #fadbd8 !important; border-left-color: #e74c3c !important; }
+        .loading { color: #667eea; font-weight: bold; }
+        #analytics-dashboard { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); }
+        .analytics-header { color: #333; margin-bottom: 25px; font-size: 24px; font-weight: bold; border-bottom: 3px solid #667eea; padding-bottom: 10px; }
+        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .metric-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px; color: white; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2); }
+        .metric-label { font-size: 13px; opacity: 0.9; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .metric-value { font-size: 32px; font-weight: bold; }
+        .events-section { background: #f9f9f9; padding: 20px; border-radius: 10px; border-left: 4px solid #667eea; }
+        .events-title { color: #333; margin-bottom: 15px; font-size: 18px; font-weight: bold; }
+        .events-list { max-height: 300px; overflow-y: auto; }
+        .event-item { background: white; padding: 12px; margin-bottom: 10px; border-radius: 8px; border-left: 3px solid #667eea; font-size: 13px; }
+        .event-text { color: #333; font-weight: bold; margin-bottom: 5px; }
+        .event-meta { color: #999; font-size: 12px; }
+        .no-events { color: #999; text-align: center; padding: 30px; font-style: italic; }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- MAIN VOICE AI SECTION -->
         <div class="main-section">
             <h1>🎤 Voice AI System</h1>
             <div class="badge">✅ Text-to-Speech | 💰 Cost: $0.00 | 🔑 Free & Open</div>
@@ -237,12 +49,10 @@
             </div>
             
             <button onclick="generateSpeech()">🎵 Generate Speech</button>
-            
             <div id="status"></div>
-            <audio id="player" controls></audio>
+            <audio id="player" controls style="width:100%; margin-top:20px;"></audio>
         </div>
         
-        <!-- ANALYTICS DASHBOARD SECTION -->
         <div id="analytics-dashboard">
             <div class="analytics-header">📊 Live Analytics Dashboard</div>
             
@@ -251,12 +61,10 @@
                     <div class="metric-label">Total Requests</div>
                     <div class="metric-value" id="total-requests">0</div>
                 </div>
-                
                 <div class="metric-card">
                     <div class="metric-label">Average Text Length</div>
                     <div class="metric-value" id="avg-text-length">0</div>
                 </div>
-                
                 <div class="metric-card">
                     <div class="metric-label">Last Request</div>
                     <div class="metric-value" id="last-request-time" style="font-size: 16px;">--</div>
@@ -266,19 +74,19 @@
             <div class="events-section">
                 <div class="events-title">📈 Recent Requests</div>
                 <div class="events-list" id="events-list">
-                    <div class="no-events">No requests yet. Generate some speech to see data here!</div>
+                    <div class="no-events">No requests yet. Generate some speech!</div>
                 </div>
             </div>
         </div>
     </div>
     
     <script>
-        // Detect if running on Railway or localhost
-        const apiBase = window.location.hostname === 'localhost' 
+        let apiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
             ? 'http://localhost:5000' 
-            : window.location.origin;  // Uses your Railway URL automatically
-
-        // Generate speech function
+            : window.location.origin;
+        
+        console.log('✅ API:', apiBase);
+        
         async function generateSpeech() {
             const text = document.getElementById('text').value.trim();
             const status = document.getElementById('status');
@@ -286,98 +94,64 @@
             
             if (!text) {
                 status.className = 'error';
-                status.textContent = '❌ Please enter some text!';
-                return;
-            }
-            
-            if (text.length > 500) {
-                status.className = 'error';
-                status.textContent = '❌ Text too long! Maximum 500 characters.';
+                status.textContent = '❌ Please enter text!';
                 return;
             }
             
             status.className = 'loading';
-            status.textContent = '⏳ Generating audio... Please wait...';
-            player.style.display = 'none';
+            status.textContent = '⏳ Generating...';
             
             try {
                 const response = await fetch(apiBase + '/api/v1/synthesize', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        text: text,
-                        voice_id: 'macos'
-                    })
+                    body: JSON.stringify({ text: text })
                 });
                 
                 const data = await response.json();
                 
                 if (data.success) {
-                    player.src = 'http://localhost:5000' + data.audio_url;
-                    player.style.display = 'block';
-                    
+                    player.src = apiBase + data.audio_url;
                     status.className = 'success';
-                    status.innerHTML = `✅ <strong>Success!</strong> Generated by ${data.provider}. Cost: ${data.cost}`;
-                    
-                    // Trigger analytics update
+                    status.textContent = `✅ Success! ${data.provider}`;
                     setTimeout(updateAnalytics, 500);
                 } else {
                     status.className = 'error';
-                    status.textContent = `❌ Error: ${data.error || 'Unknown error'}`;
+                    status.textContent = `❌ ${data.error}`;
                 }
             } catch (error) {
                 status.className = 'error';
-                status.textContent = `❌ Connection Error: ${error.message}. Make sure backend is running on http://localhost:5000`;
+                status.textContent = `❌ Error: ${error.message}`;
+                console.error(error);
             }
         }
         
-        // Update analytics function
         function updateAnalytics() {
             fetch(apiBase + '/api/v1/analytics')
-                .then(response => response.json())
+                .then(r => r.json())
                 .then(data => {
                     if (data.success) {
-                        // Update metric cards
                         document.getElementById('total-requests').textContent = data.total_requests;
                         document.getElementById('avg-text-length').textContent = data.avg_text_length;
                         
-                        // Update last request time
                         if (data.events.length > 0) {
                             const lastEvent = data.events[0];
                             document.getElementById('last-request-time').textContent = 
                                 new Date(lastEvent.timestamp * 1000).toLocaleTimeString();
                             
-                            // Update events list
-                            const eventsList = document.getElementById('events-list');
-                            eventsList.innerHTML = data.events.map((event, index) => `
+                            document.getElementById('events-list').innerHTML = data.events.map((e, i) => `
                                 <div class="event-item">
-                                    <div class="event-text">#${data.total_requests - index}: ${event.text.substring(0, 40)}${event.text.length > 40 ? '...' : ''}</div>
-                                    <div class="event-meta">
-                                        Length: ${event.length} chars | Time: ${new Date(event.timestamp * 1000).toLocaleTimeString()} | File: ${event.file_size}
-                                    </div>
+                                    <div class="event-text">#${data.total_requests - i}: ${e.text.substring(0, 40)}${e.text.length > 40 ? '...' : ''}</div>
+                                    <div class="event-meta">Length: ${e.length} | Time: ${new Date(e.timestamp * 1000).toLocaleTimeString()} | Size: ${e.file_size}</div>
                                 </div>
                             `).join('');
-                        } else {
-                            document.getElementById('events-list').innerHTML = 
-                                '<div class="no-events">No requests yet. Generate some speech to see data here!</div>';
                         }
                     }
-                })
-                .catch(err => console.log('Analytics error:', err));
+                }).catch(e => console.log('Analytics error:', e));
         }
         
-        // Update analytics every 2 seconds
         setInterval(updateAnalytics, 2000);
-        
-        // Initial call
         updateAnalytics();
-        
-        // Allow Enter key to generate
-        document.getElementById('text').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && e.ctrlKey) {
-                generateSpeech();
-            }
-        });
     </script>
 </body>
 </html>
