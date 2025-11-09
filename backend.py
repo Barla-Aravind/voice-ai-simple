@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, render_template_string
 from flask_cors import CORS
 import subprocess
 import os
@@ -11,6 +11,17 @@ CORS(app)
 
 os.makedirs('audio_output', exist_ok=True)
 os.makedirs('events', exist_ok=True)
+
+@app.route('/')
+def serve_frontend():
+    """Serve the index.html file"""
+    try:
+        with open('index.html', 'r') as f:
+            html_content = f.read()
+        return html_content
+    except FileNotFoundError:
+        return "index.html not found", 404
+
 
 @app.route('/api/v1/synthesize', methods=['POST'])
 def synthesize():
