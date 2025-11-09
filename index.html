@@ -273,6 +273,11 @@
     </div>
     
     <script>
+        // Detect if running on Railway or localhost
+        const apiBase = window.location.hostname === 'localhost' 
+            ? 'http://localhost:5000' 
+            : window.location.origin;  // Uses your Railway URL automatically
+
         // Generate speech function
         async function generateSpeech() {
             const text = document.getElementById('text').value.trim();
@@ -296,7 +301,7 @@
             player.style.display = 'none';
             
             try {
-                const response = await fetch('http://localhost:5000/api/v1/synthesize', {
+                const response = await fetch(apiBase + '/api/v1/synthesize', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -328,7 +333,7 @@
         
         // Update analytics function
         function updateAnalytics() {
-            fetch('http://localhost:5000/api/v1/analytics')
+            fetch(apiBase + '/api/v1/analytics')
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
