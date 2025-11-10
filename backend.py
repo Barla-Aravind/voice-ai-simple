@@ -1,22 +1,10 @@
-"""
-VOICE AI - MAC COMPATIBLE BACKEND (gTTS + Web Audio API)
-
-Why this approach?
-- gTTS works perfectly on Mac (no objc issues)
-- Speed/Pitch/Volume control done via Web Audio API (JavaScript)
-- Emotions via text modification
-- No pyttsx3 dependency conflicts on Mac
-"""
-
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
-from pydub import AudioSegment
 from gtts import gTTS
 import os
 import uuid
 import json
 import time
-import io
 
 app = Flask(__name__)
 CORS(app)
@@ -24,7 +12,7 @@ CORS(app)
 os.makedirs('audio_output', exist_ok=True)
 os.makedirs('events', exist_ok=True)
 
-print("✅ Using gTTS (Google Text-to-Speech) - Mac Compatible")
+print("✅ Using gTTS (Google Text-to-Speech) - Railway Compatible")
 
 # ===== ROUTE 1: SERVE FRONTEND =====
 @app.route('/')
@@ -65,13 +53,7 @@ def apply_emotion_to_text(text, emotion):
 # ===== ROUTE 2: SYNTHESIZE TEXT TO SPEECH =====
 @app.route('/api/v1/synthesize', methods=['POST'])
 def synthesize():
-    """
-    Generate speech with:
-    ✅ gTTS (works on Mac)
-    ✅ Emotions (text modification)
-    ✅ Speed/Pitch/Volume (controlled via Web Audio API on frontend)
-    ✅ Multiple languages
-    """
+    """Generate speech with gTTS"""
     try:
         start_time = time.time()
         data = request.get_json()
@@ -86,12 +68,10 @@ def synthesize():
         if not text:
             return jsonify({'success': False, 'error': 'Text required'}), 400
         
-        # Validate inputs
         valid_emotions = ['happy', 'sad', 'angry', 'calm']
         if emotion not in valid_emotions:
             emotion = 'happy'
         
-        # Clamp values
         speed = max(0.5, min(2.0, speed))
         pitch = max(0.5, min(2.0, pitch))
         volume = max(0, min(100, volume))
@@ -100,12 +80,10 @@ def synthesize():
         mp3_path = os.path.abspath(os.path.join('audio_output', f"{filename}.mp3"))
         
         print(f"\n📝 Generating: {text[:50]}...")
-        print(f"   Language: {language}, Emotion: {emotion}, Speed: {speed}x, Pitch: {pitch}, Volume: {volume}%")
+        print(f"   Language: {language}, Emotion: {emotion}")
         
-        # ===== APPLY EMOTION TO TEXT =====
         enhanced_text = apply_emotion_to_text(text, emotion)
         
-        # ===== GENERATE SPEECH WITH gTTS =====
         try:
             tts = gTTS(text=enhanced_text, lang=language, slow=False)
             tts.save(mp3_path)
@@ -114,7 +92,6 @@ def synthesize():
             print(f"❌ gTTS error: {gtts_err}")
             return jsonify({'success': False, 'error': f'Speech generation failed: {str(gtts_err)}'}), 500
         
-        # Check if MP3 file was created
         if os.path.exists(mp3_path) and os.path.getsize(mp3_path) > 100:
             size_bytes = os.path.getsize(mp3_path)
             if size_bytes < 1024:
@@ -126,7 +103,6 @@ def synthesize():
             
             processing_time = round(time.time() - start_time, 3)
             
-            # ===== LOG EVENT FOR SPARK STREAMING =====
             event_data = {
                 "timestamp": time.time(),
                 "datetime": time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
@@ -156,7 +132,7 @@ def synthesize():
             return jsonify({
                 'success': True,
                 'audio_url': f'/download/{filename}.mp3',
-                'provider': 'Google TTS (Works on Mac)',
+                'provider': 'Google TTS (gTTS)',
                 'voice': voice,
                 'language': language,
                 'emotion': emotion,
@@ -207,12 +183,14 @@ def get_analytics():
                 'avg_text_length': 0,
                 'voice_breakdown': {},
                 'emotion_breakdown': {},
+                'language_breakdown': {},
                 'events': []
             })
         
         events = []
         voice_count = {}
         emotion_count = {}
+        language_count = {}
         avg_speed = 0
         avg_pitch = 0
         
@@ -229,6 +207,9 @@ def get_analytics():
                         emotion = event.get('emotion_selected', 'happy')
                         emotion_count[emotion] = emotion_count.get(emotion, 0) + 1
                         
+                        language = event.get('language_selected', 'en')
+                        language_count[language] = language_count.get(language, 0) + 1
+                        
                         avg_speed += event.get('speed', 1.0)
                         avg_pitch += event.get('pitch', 1.0)
                 except:
@@ -241,6 +222,7 @@ def get_analytics():
                 'avg_text_length': 0,
                 'voice_breakdown': {},
                 'emotion_breakdown': {},
+                'language_breakdown': {},
                 'events': []
             })
         
@@ -255,6 +237,7 @@ def get_analytics():
             'avg_text_length': round(avg_length, 2),
             'voice_breakdown': voice_count,
             'emotion_breakdown': emotion_count,
+            'language_breakdown': language_count,
             'avg_speed': avg_speed,
             'avg_pitch': avg_pitch,
             'events': events[:10]
@@ -265,14 +248,11 @@ def get_analytics():
 
 if __name__ == '__main__':
     print("\n" + "="*60)
-    print("🚀 Voice AI Backend - MAC COMPATIBLE (gTTS)")
+    print("🚀 Voice AI Backend - RAILWAY COMPATIBLE")
     print("="*60)
-    print("✅ gTTS Engine (no pyttsx3 conflicts)")
-    print("✅ Speed control (0.5x - 2x) via Web Audio API")
-    print("✅ Pitch control (0.5 - 2.0) via Web Audio API")
-    print("✅ Emotions (happy/sad/angry/calm)")
-    print("✅ Multiple languages (EN, HI, TE, ES, FR, etc)")
-    print("✅ Volume control via Web Audio API")
+    print("✅ gTTS Engine")
+    print("✅ 8 Languages")
+    print("✅ Emotions & Analytics")
     print("="*60 + "\n")
     
     app.run(debug=True, host='0.0.0.0', port=5000)
