@@ -4,3 +4,4 @@ gtts==2.4.0
 gunicorn==21.2.0
 pyspark==3.5.0
 pydub==0.25.1
+pyaudioop==0.1.1
