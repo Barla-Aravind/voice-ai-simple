@@ -1,0 +1,54 @@
+# Docker Compose - run entire app stack with one command
+# Useful for local development with all services
+
+version: '3.9'
+
+services:
+  # Main backend service
+  backend:
+    # Build from Dockerfile in current directory
+    build:
+      context: .
+      dockerfile: Dockerfile
+    
+    # Container name (for easy reference)
+    container_name: voice-ai-backend
+    
+    # Port mapping: outside:inside
+    ports:
+      - "5000:5000"
+    
+    # Environment variables
+    environment:
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+    
+    # Mount volumes for development (optional)
+    # Allows live code reload without rebuilding
+    volumes:
+      - ./backend.py:/app/backend.py
+      - ./index.html:/app/index.html
+      - ./audio_output:/app/audio_output
+      - ./events:/app/events
+    
+    # Restart policy
+    # always = restart container if it crashes
+    restart: always
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+# Networks (optional)
+networks:
+  default:
+    name: voice-ai-network
+
+# Volumes (optional)
+volumes:
+  audio_output:
+  events:

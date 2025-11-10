@@ -1,0 +1,47 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: voice-ai-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: voice-ai-deployment  # Auto-scale this deployment
+  
+  minReplicas: 3  # Minimum 3 pods (always on)
+  maxReplicas: 100  # Maximum 100 pods (cost control)
+  
+  metrics:
+  # Metric 1: CPU Utilization
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 80  # If CPU avg > 80%, add pod
+  
+  # Metric 2: Memory Utilization
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        type: Utilization
+        averageUtilization: 85  # If Memory avg > 85%, add pod
+  
+  behavior:
+    scaleDown:
+      stabilizationWindowSeconds: 300  # Wait 5 mins before scale down
+      policies:
+      - type: Percent
+        value: 50  # Remove 50% of pods
+        periodSeconds: 60
+    scaleUp:
+      stabilizationWindowSeconds: 0  # Scale up immediately
+      policies:
+      - type: Percent
+        value: 100  # Add 100% more pods (double)
+        periodSeconds: 60
+      - type: Pods
+        value: 2  # Or add 2 pods
+        periodSeconds: 60
+      selectPolicy: Max  # Use whichever adds more

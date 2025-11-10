@@ -1,0 +1,54 @@
+# Git files - not needed in container
+.git
+.gitignore
+.github
+
+# Python cache
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environment - don't copy local venv
+venv/
+env/
+ENV/
+.venv
+
+# IDE files - not needed in container
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Development files
+.env
+.env.local
+.env.*.local
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Documentation
+README.md
+docs/
+
+# This reduces image size from 500MB → 200MB

@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: voice-ai-service
+  labels:
+    app: voice-ai
+spec:
+  type: LoadBalancer  # Public facing (gets external IP)
+  selector:
+    app: voice-ai  # Route to pods labeled "app: voice-ai"
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80  # EXTERNAL port (what users access)
+    targetPort: 5000  # INTERNAL port (container port)
+  sessionAffinity: None
+  sessionAffinityConfig:
+    clientIP:
+      timeoutSeconds: 10800
