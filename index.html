@@ -3,129 +3,595 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Voice AI - Streaming Analytics</title>
+    <title>Voice AI Studio - Professional Text-to-Speech</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
-        .container { max-width: 1000px; margin: 0 auto; }
-        .main-section { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); margin-bottom: 20px; }
-        h1 { color: #333; margin-bottom: 10px; text-align: center; font-size: 28px; }
-        .badge { text-align: center; color: #27ae60; margin-bottom: 30px; font-size: 14px; font-weight: bold; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; color: #333; font-weight: 500; font-size: 14px; }
-        textarea { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; font-family: inherit; resize: vertical; min-height: 100px; }
-        textarea:focus { outline: none; border-color: #667eea; box-shadow: 0 0 5px rgba(102, 126, 234, 0.3); }
-        button { width: 100%; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.3s; }
-        button:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4); }
-        #status { margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 8px; color: #333; min-height: 20px; border-left: 4px solid #667eea; }
-        #player { width: 100%; margin-top: 20px; }
-        .success { color: #27ae60; background: #d5f4e6 !important; border-left-color: #27ae60 !important; }
-        .error { color: #e74c3c; background: #fadbd8 !important; border-left-color: #e74c3c !important; }
-        .loading { color: #667eea; font-weight: bold; }
-        #analytics-dashboard { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3); }
-        .analytics-header { color: #333; margin-bottom: 25px; font-size: 24px; font-weight: bold; border-bottom: 3px solid #667eea; padding-bottom: 10px; }
-        .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
-        .metric-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px; color: white; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2); }
-        .metric-label { font-size: 13px; opacity: 0.9; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
-        .metric-value { font-size: 32px; font-weight: bold; }
-        .events-section { background: #f9f9f9; padding: 20px; border-radius: 10px; border-left: 4px solid #667eea; }
-        .events-title { color: #333; margin-bottom: 15px; font-size: 18px; font-weight: bold; }
-        .events-list { max-height: 300px; overflow-y: auto; }
-        .event-item { background: white; padding: 12px; margin-bottom: 10px; border-radius: 8px; border-left: 3px solid #667eea; font-size: 13px; }
-        .event-text { color: #333; font-weight: bold; margin-bottom: 5px; }
-        .event-meta { color: #999; font-size: 12px; }
-        .no-events { color: #999; text-align: center; padding: 30px; font-style: italic; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header p {
+            font-size: 16px;
+            opacity: 0.9;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        @media (max-width: 900px) {
+            .section-grid { grid-template-columns: 1fr; }
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 120px;
+            transition: all 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+        
+        select, input[type="number"], input[type="range"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: all 0.3s;
+            background: white;
+        }
+        
+        select:focus, input[type="number"]:focus, input[type="range"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+        
+        .emotion-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .emotion-btn {
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+        }
+        
+        .emotion-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .emotion-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+        
+        .slider-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        input[type="range"] {
+            flex: 1;
+            height: 6px;
+            appearance: none;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            border-radius: 5px;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .slider-value {
+            min-width: 40px;
+            text-align: center;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        button:active {
+            transform: translateY(-1px);
+        }
+        
+        #status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 5px solid;
+            font-weight: 600;
+        }
+        
+        .success {
+            background: #d5f4e6;
+            border-left-color: #27ae60;
+            color: #27ae60;
+        }
+        
+        .error {
+            background: #fadbd8;
+            border-left-color: #e74c3c;
+            color: #e74c3c;
+        }
+        
+        .loading {
+            background: #e3f2fd;
+            border-left-color: #2196F3;
+            color: #2196F3;
+        }
+        
+        #audio-section {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            border: 2px solid #e0e0e0;
+            display: none;
+        }
+        
+        #audio-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        #player {
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+        
+        .download-link {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        
+        .download-link:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+        
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        
+        .breakdown-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .breakdown-card {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .breakdown-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .breakdown-item {
+            font-size: 13px;
+            color: #555;
+            padding: 5px 0;
+        }
+        
+        .events-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .event-item {
+            background: white;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .event-text {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .event-meta {
+            font-size: 12px;
+            color: #999;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="main-section">
-            <h1>🎤 Voice AI System</h1>
-            <div class="badge">✅ Text-to-Speech | 💰 Cost: $0.00 | 🔑 Free & Open</div>
-            
-            <div class="form-group">
-                <label for="text">📝 Enter Your Text:</label>
-                <textarea id="text" placeholder="Type your text here...">Hello! This is a voice synthesis test.</textarea>
-            </div>
-            
-            <button onclick="generateSpeech()">🎵 Generate Speech</button>
-            <div id="status"></div>
-            <audio id="player" controls style="width:100%; margin-top:20px;"></audio>
+        <!-- HEADER -->
+        <div class="header">
+            <h1>🎤 Voice AI Studio</h1>
+            <p>Professional Text-to-Speech with Emotions & Advanced Controls</p>
         </div>
         
-        <div id="analytics-dashboard">
-            <div class="analytics-header">📊 Live Analytics Dashboard</div>
+        <!-- MAIN SECTION -->
+        <div class="card">
+            <h2>✨ Create Your Audio</h2>
             
-            <div class="metrics-grid">
-                <div class="metric-card">
-                    <div class="metric-label">Total Requests</div>
-                    <div class="metric-value" id="total-requests">0</div>
+            <div class="section-grid">
+                <!-- LEFT SIDE: INPUT & CONTROLS -->
+                <div>
+                    <!-- TEXT INPUT -->
+                    <div class="form-group">
+                        <label>📝 Your Text</label>
+                        <textarea id="text" placeholder="Enter text you want to convert to speech...">Hello! Welcome to Voice AI Studio.</textarea>
+                    </div>
+                    
+                    <!-- EMOTION SELECTION -->
+                    <div class="form-group">
+                        <label>😊 Select Emotion / Tone</label>
+                        <div class="emotion-grid">
+                            <button type="button" class="emotion-btn active" onclick="setEmotion('happy')">😊 Happy</button>
+                            <button type="button" class="emotion-btn" onclick="setEmotion('sad')">😢 Sad</button>
+                            <button type="button" class="emotion-btn" onclick="setEmotion('angry')">😠 Angry</button>
+                            <button type="button" class="emotion-btn" onclick="setEmotion('calm')">😌 Calm</button>
+                        </div>
+                    </div>
+                    
+                    <!-- VOICE SELECTION -->
+                    <div class="form-group">
+                        <label>🎙️ Voice</label>
+                        <select id="voice">
+                            <option value="female">Female Voice</option>
+                            <option value="male">Male Voice</option>
+                            <option value="neutral">Neutral Voice</option>
+                        </select>
+                    </div>
+                    
+                    <!-- LANGUAGE SELECTION -->
+                    <div class="form-group">
+                        <label>🌍 Language</label>
+                        <select id="language">
+                            <option value="en">🇬🇧 English</option>
+                            <option value="hi">🇮🇳 हिन्दी (Hindi)</option>
+                            <option value="te">🇮🇳 తెలుగు (Telugu)</option>
+                            <option value="es">🇪🇸 Español (Spanish)</option>
+                            <option value="fr">🇫🇷 Français (French)</option>
+                            <option value="de">🇩🇪 Deutsch (German)</option>
+                            <option value="ja">🇯🇵 日本語 (Japanese)</option>
+                            <option value="zh">🇨🇳 中文 (Chinese)</option>
+                        </select>
+                    </div>
                 </div>
-                <div class="metric-card">
-                    <div class="metric-label">Average Text Length</div>
-                    <div class="metric-value" id="avg-text-length">0</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-label">Last Request</div>
-                    <div class="metric-value" id="last-request-time" style="font-size: 16px;">--</div>
+                
+                <!-- RIGHT SIDE: ADVANCED CONTROLS -->
+                <div>
+                    <!-- SPEED CONTROL -->
+                    <div class="form-group">
+                        <label>⚡ Speech Speed</label>
+                        <div class="slider-group">
+                            <input type="range" id="speed" min="0.5" max="2" step="0.1" value="1">
+                            <span class="slider-value" id="speedValue">1.0x</span>
+                        </div>
+                    </div>
+                    
+                    <!-- PITCH CONTROL -->
+                    <div class="form-group">
+                        <label>🎵 Pitch Level</label>
+                        <div class="slider-group">
+                            <input type="range" id="pitch" min="0.5" max="2" step="0.1" value="1">
+                            <span class="slider-value" id="pitchValue">Normal</span>
+                        </div>
+                    </div>
+                    
+                    <!-- VOLUME CONTROL -->
+                    <div class="form-group">
+                        <label>🔊 Volume</label>
+                        <div class="slider-group">
+                            <input type="range" id="volume" min="0" max="100" step="5" value="100">
+                            <span class="slider-value" id="volumeValue">100%</span>
+                        </div>
+                    </div>
                 </div>
             </div>
             
-            <div class="events-section">
-                <div class="events-title">📈 Recent Requests</div>
-                <div class="events-list" id="events-list">
-                    <div class="no-events">No requests yet. Generate some speech!</div>
+            <!-- GENERATE BUTTON -->
+            <button onclick="generateSpeech()" style="font-size: 18px; padding: 16px; margin-top: 20px;">
+                🎵 Generate Speech
+            </button>
+            
+            <!-- STATUS MESSAGE -->
+            <div id="status"></div>
+            
+            <!-- AUDIO PLAYER & DOWNLOAD -->
+            <div id="audio-section">
+                <h3>🔊 Listen or Download</h3>
+                <audio id="player" controls></audio>
+                <a id="download-link" href="#" target="_blank" class="download-link">⏬ Download MP3</a>
+            </div>
+        </div>
+        
+        <!-- ANALYTICS DASHBOARD -->
+        <div class="card">
+            <h2>📊 Analytics Dashboard</h2>
+            
+            <div class="analytics-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Requests</div>
+                    <div class="stat-value" id="total-requests">0</div>
                 </div>
+                <div class="stat-card">
+                    <div class="stat-label">Avg Length</div>
+                    <div class="stat-value" id="avg-text-length">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Last Generated</div>
+                    <div class="stat-value" id="last-request-time" style="font-size: 14px;">--:--</div>
+                </div>
+            </div>
+            
+            <!-- BREAKDOWNS -->
+            <h2 style="margin-top: 20px; margin-bottom: 15px;">📈 Usage Breakdown</h2>
+            <div class="breakdown-grid">
+                <div class="breakdown-card">
+                    <div class="breakdown-title">🎙️ Voice Usage</div>
+                    <div id="voice-breakdown">No data yet</div>
+                </div>
+                <div class="breakdown-card">
+                    <div class="breakdown-title">😊 Emotion Usage</div>
+                    <div id="emotion-breakdown">No data yet</div>
+                </div>
+                <div class="breakdown-card">
+                    <div class="breakdown-title">🌍 Language Usage</div>
+                    <div id="language-breakdown">No data yet</div>
+                </div>
+            </div>
+            
+            <!-- RECENT EVENTS -->
+            <h2 style="margin-top: 20px; margin-bottom: 15px;">📋 Recent Activity</h2>
+            <div class="events-list" id="events-list">
+                <div style="text-align: center; color: #999; padding: 30px;">No activity yet</div>
             </div>
         </div>
     </div>
     
     <script>
+        // ===== STATE MANAGEMENT =====
+        let currentEmotion = 'happy';
         let apiBase = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
             ? 'http://localhost:5000' 
             : window.location.origin;
         
-        console.log('✅ API:', apiBase);
+        console.log('✅ API Base:', apiBase);
         
+        // ===== SET EMOTION =====
+        function setEmotion(emotion) {
+            currentEmotion = emotion;
+            document.querySelectorAll('.emotion-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+        
+        // ===== UPDATE SLIDERS =====
+        document.getElementById('speed').addEventListener('input', function() {
+            document.getElementById('speedValue').textContent = this.value + 'x';
+        });
+        
+        document.getElementById('pitch').addEventListener('input', function() {
+            const pitchLevel = this.value;
+            const pitchLabel = pitchLevel < 1 ? 'Low' : pitchLevel > 1 ? 'High' : 'Normal';
+            document.getElementById('pitchValue').textContent = pitchLabel;
+        });
+        
+        document.getElementById('volume').addEventListener('input', function() {
+            document.getElementById('volumeValue').textContent = this.value + '%';
+        });
+        
+        // ===== GENERATE SPEECH =====
         async function generateSpeech() {
             const text = document.getElementById('text').value.trim();
+            const voice = document.getElementById('voice').value;
+            const language = document.getElementById('language').value;
+            const emotion = currentEmotion;
+            const speed = document.getElementById('speed').value;
+            const pitch = document.getElementById('pitch').value;
+            const volume = document.getElementById('volume').value;
             const status = document.getElementById('status');
             const player = document.getElementById('player');
+            const audioSection = document.getElementById('audio-section');
             
             if (!text) {
                 status.className = 'error';
                 status.textContent = '❌ Please enter text!';
+                audioSection.style.display = 'none';
                 return;
             }
             
             status.className = 'loading';
-            status.textContent = '⏳ Generating...';
+            status.textContent = '⏳ Generating audio... Please wait...';
+            audioSection.style.display = 'none';
             
             try {
+                console.log('📤 Sending request with language:', language);
                 const response = await fetch(apiBase + '/api/v1/synthesize', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: text })
+                    body: JSON.stringify({ 
+                        text: text,
+                        voice: voice,
+                        language: language,
+                        emotion: emotion,
+                        speed: parseFloat(speed),
+                        pitch: parseFloat(pitch),
+                        volume: parseInt(volume)
+                    })
                 });
                 
                 const data = await response.json();
+                console.log('📥 Response:', data);
                 
                 if (data.success) {
-                    player.src = apiBase + data.audio_url;
+                    // Set audio player source (should be .mp3 now)
+                    const audioUrl = apiBase + data.audio_url;
+                    console.log('🔊 Audio URL:', audioUrl);
+                    
+                    player.src = audioUrl;
+                    player.volume = volume / 100;
+                    
+                    // Show audio section and download link
+                    audioSection.style.display = 'block';
+                    document.getElementById('download-link').href = audioUrl;
+                    
                     status.className = 'success';
-                    status.textContent = `✅ Success! ${data.provider}`;
+                    status.textContent = `✅ Success! ${data.provider} - Language: ${language.toUpperCase()} | Emotion: ${emotion} | Speed: ${speed}x`;
+                    
+                    // Try to auto-play
+                    player.play().catch(err => console.log('Auto-play prevented:', err));
+                    
                     setTimeout(updateAnalytics, 500);
                 } else {
                     status.className = 'error';
-                    status.textContent = `❌ ${data.error}`;
+                    status.textContent = `❌ Error: ${data.error}`;
+                    audioSection.style.display = 'none';
                 }
             } catch (error) {
                 status.className = 'error';
-                status.textContent = `❌ Error: ${error.message}`;
-                console.error(error);
+                status.textContent = `❌ Connection Error: ${error.message}`;
+                audioSection.style.display = 'none';
+                console.error('❌ Full Error:', error);
             }
         }
         
+        // ===== UPDATE ANALYTICS =====
         function updateAnalytics() {
             fetch(apiBase + '/api/v1/analytics')
                 .then(r => r.json())
@@ -139,10 +605,41 @@
                             document.getElementById('last-request-time').textContent = 
                                 new Date(lastEvent.timestamp * 1000).toLocaleTimeString();
                             
-                            document.getElementById('events-list').innerHTML = data.events.map((e, i) => `
+                            // Voice breakdown
+                            if (Object.keys(data.voice_breakdown).length > 0) {
+                                const voiceHTML = Object.entries(data.voice_breakdown)
+                                    .map(([voice, count]) => `<div class="breakdown-item">• ${voice.toUpperCase()}: ${count}</div>`)
+                                    .join('');
+                                document.getElementById('voice-breakdown').innerHTML = voiceHTML;
+                            }
+                            
+                            // Emotion breakdown
+                            if (Object.keys(data.emotion_breakdown).length > 0) {
+                                const emotionEmojis = {
+                                    'happy': '😊',
+                                    'sad': '😢',
+                                    'angry': '😠',
+                                    'calm': '😌'
+                                };
+                                const emotionHTML = Object.entries(data.emotion_breakdown)
+                                    .map(([emotion, count]) => `<div class="breakdown-item">${emotionEmojis[emotion] || emotion}: ${count}</div>`)
+                                    .join('');
+                                document.getElementById('emotion-breakdown').innerHTML = emotionHTML;
+                            }
+                            
+                            // Language breakdown
+                            if (Object.keys(data.language_breakdown).length > 0) {
+                                const languageHTML = Object.entries(data.language_breakdown)
+                                    .map(([lang, count]) => `<div class="breakdown-item">• ${lang.toUpperCase()}: ${count}</div>`)
+                                    .join('');
+                                document.getElementById('language-breakdown').innerHTML = languageHTML;
+                            }
+                            
+                            // Events
+                            document.getElementById('events-list').innerHTML = data.events.slice(0, 5).map((e, i) => `
                                 <div class="event-item">
-                                    <div class="event-text">#${data.total_requests - i}: ${e.text.substring(0, 40)}${e.text.length > 40 ? '...' : ''}</div>
-                                    <div class="event-meta">Length: ${e.length} | Time: ${new Date(e.timestamp * 1000).toLocaleTimeString()} | Size: ${e.file_size}</div>
+                                    <div class="event-text">#${data.total_requests - i}: ${e.text.substring(0, 50)}${e.text.length > 50 ? '...' : ''}</div>
+                                    <div class="event-meta">Voice: ${e.voice_selection || 'N/A'} | Language: ${e.language_selected || 'N/A'} | Emotion: ${e.emotion_selected || 'N/A'} | Size: ${e.file_size}</div>
                                 </div>
                             `).join('');
                         }
